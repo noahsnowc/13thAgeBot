@@ -16,7 +16,7 @@ data/*
 *.conf
 bin/
 .vscode/
-data/
+
 lib/
 lib64/
 share/
