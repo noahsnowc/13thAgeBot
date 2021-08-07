@@ -165,6 +165,9 @@ class Charactersheet_Commands(commands.Cog, name="Character Sheet Commands"):
             await ctx.send("Send me a name. I NEED A NAME. LET ME DELETE.")
         else:
             await ctx.send(charactersheet_db.delete_character(ctx.message.author.id, args))
+    @cs.command(case_insensitive=True, help="")
+    async def stats(self, ctx, *args):
+        await ctx.send(charactersheet_db.get_cs_value(ctx.message.author.id, "Bob",*args))
 
     #==========================================
     # Database/SQL Testing Below this point
