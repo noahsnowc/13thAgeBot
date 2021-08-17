@@ -28,7 +28,7 @@ class Marv(commands.Cog, name="Marv"):
     @commands.Cog.listener("on_message")
     async def respond(self, message):
         user_message =  message.content.lower()
-        if message.author != self.bot.user and self.marvword[0] in user_message:
+        if message.author != self.bot.user and self.marvword[0] in user_message  and "!marv" not in user_message:
             print(self.responseFlag)
             await message.channel.send(self.marv_response(user_message))
         elif message.author != self.bot.user and self.responseFlag == 'Rolling':
@@ -44,8 +44,11 @@ class Marv(commands.Cog, name="Marv"):
                 return "You're life. Laugh, fleshling."
             else:
                 return "What do you want organic spare parts? I haven't got all day."
+        
         if self.responseFlag == 'Rolling':
             return "What do you want organic spare parts? I haven't got all day."
+ 
+        
         
 
     def rolling_proc_message(self, message):

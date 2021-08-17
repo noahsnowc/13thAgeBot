@@ -14,7 +14,27 @@ def create_new_sheet(author_name, character_name, cursor):
         print("Database Updated")
         print(cursor.fetchall())
 
-create_new_sheet("Test author_name","Test Boy", cursor)
-cursor.execute('Select * from charactersheet')
-print(cursor.fetchall())
+def get_value(cursor, character_name, *args) :
+        print(character_name)
+        print(args)
+        for arg in args:
+                cursor.execute('SELECT ? from charactersheet where character_name=?',(arg, character_name))
+        print(cursor.fetchall())
 
+def update_character(cursor, character_name, *args):
+        for arg in args:
+                print("What would you like to update "+arg+" to?")
+                input1 = input()
+                cursor.execute('UPDATE charactersheet SET class = ? where character_name=?',(input1, character_name))
+        db.commit()
+        print("Updated Database")
+        
+
+cursor.execute('Select race from charactersheet where character_name=?', ("Bob",))
+print(cursor.fetchall())
+#print(cursor.fetchall())
+#get_value(cursor, "Bob", 'class', 'race')
+#update_character(cursor, "Bob", 'class', 'race')
+#get_value(cursor, "Bob", 'class', 'race')
+
+THis all seems so fucked, willl look again in morning
