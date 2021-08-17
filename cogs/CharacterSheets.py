@@ -140,10 +140,15 @@ class DatabaseIO:
     
     def set_cs_value(self, *args):
         self.cursor.execute()
-        return "Value(s) addede"
+        return "Value(s) added"
 
 charactersheet_db = DatabaseIO()
-        
+
+
+##############################################################################
+#Database Commands
+##############################################################################
+
 class Charactersheet_Commands(commands.Cog, name="Character Sheet Commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -161,13 +166,13 @@ class Charactersheet_Commands(commands.Cog, name="Character Sheet Commands"):
     
     @cs.command(case_insensitive=True, help="")
     async def delete_sheet(self, ctx, args):
-        if args:
+        if not args:
             await ctx.send("Send me a name. I NEED A NAME. LET ME DELETE.")
         else:
             await ctx.send(charactersheet_db.delete_character(ctx.message.author.id, args))
     @cs.command(case_insensitive=True, help="")
-    async def stats(self, ctx, *args):
-        await ctx.send(charactersheet_db.get_cs_value(ctx.message.author.id, "Bob",*args))
+    async def stats(self, ctx, character_name_arg, *stat_args):
+        await ctx.send(charactersheet_db.get_cs_value(ctx.message.author.id, character_name_arg, stat_args))
 
     #==========================================
     # Database/SQL Testing Below this point
