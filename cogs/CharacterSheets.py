@@ -1,55 +1,8 @@
 """Module containing support command for the main bot."""
+from os import stat
 import sqlite3
 from discord.ext import commands
 
-""" class CharacterSheet:
-    def __init__(self):
-        csdata = [
-        self.author_name : "",
-        self.character_name : "",
-        self.cs_class : "",
-        self.race : "",
-        self.level : 0,
-        self.strength : 0,
-        self.constitution : 0,
-        self.dexterity : 0,
-        self. wisdom : 0,
-        self.charisma : 0,
-        self.ac : 0,
-        self.pd : 0,
-        self.md : 0,
-        self.hp_max : 0,
-        self.hp_current : 0,
-        self.recoveries_current : 0,
-        self.recoveries_max : 0,
-        self.out : "",
-        self.racial_power : "",
-        self.powers : [],
-        self.spells : [],
-        self.icon_relationships : [],
-        self.backgrounds : [],
-        self.talents : [],
-        self.class_features : [],
-        self.feats : [],
-        self.equipment : [],
-        self.gold : [],
-        self.magic_items : [],
-        ]
-
-
-    def get_info(self, info_tuple):
-        for data in info_tuple:
-            return self.csdata[data]
-
-    def set_info(self, info_tuple):
-        for data in info_tuple:
-            self.csdata[data] = info_tuple[data]
-
-    def roll_stat
-
-
-cs_object = CharacterSheet() """ 
-"""May or may not need the above"""
 
 class DatabaseIO:
     """Class definition to contain all interactions with the SQLite3 database."""
@@ -87,7 +40,8 @@ class DatabaseIO:
   feats BLOB,
   equipment BLOB,
   gold BLOB,
-  magic_items BLOB
+  magic_items BLOB,
+  active boolean DEFAULT FALSE
 )
 ''')
     
@@ -132,15 +86,27 @@ class DatabaseIO:
         message = character_name+" Deleted"
         return message
 
-    def get_cs_value(self, author_name, character_name, *args):
-        self.cursor.executeall('''SELECT ? FROM charactersheet 
-                        WHERE author_name=? and character_name=?''', (args,author_name,character_name))
+    def get_cs_value(self, author_name, arg):
+        query = 'SELECT '+arg+' FROM charactersheet WHERE author_name=? and active=TRUE'
+        self.cursor.execute(query, (author_name,)) 
         cs_values = self.cursor.fetchall()
         return cs_values
     
-    def set_cs_value(self, *args):
-        self.cursor.execute()
+    def set_cs_value(self, author_name, character_name, *args):
+        for arg in args:
+            string_arg = str(arg)
+            query = 'UPDATE '+string_arg+' FROM charactersheet WHERE author_name=? AND character_names=?'
+        self.cursor.executeall(query, (author_name, character_name))
         return "Value(s) added"
+
+    def activate_sheet(self, author_name, character_name):
+        self.cursor.execute('Select character_name from charactersheet')
+        if (any(character_name in i for i in self.cursor.fetchall())):
+            self.cursor.execute('UPDATE charactersheet SET active= True where character_name=? and author_name=?',(character_name,author_name))
+            return '{} has been set to active.'.format(character_name)
+        else:
+            return 'Character Sheet not found.'
+    #==========================================
 
 charactersheet_db = DatabaseIO()
 
@@ -149,6 +115,7 @@ charactersheet_db = DatabaseIO()
 #Database Commands
 ##############################################################################
 
+## Refactor these to use ACTIVATED character rather than supply character name
 class Charactersheet_Commands(commands.Cog, name="Character Sheet Commands"):
     def __init__(self, bot):
         self.bot = bot
@@ -170,11 +137,37 @@ class Charactersheet_Commands(commands.Cog, name="Character Sheet Commands"):
             await ctx.send("Send me a name. I NEED A NAME. LET ME DELETE.")
         else:
             await ctx.send(charactersheet_db.delete_character(ctx.message.author.id, args))
-    @cs.command(case_insensitive=True, help="")
-    async def stats(self, ctx, character_name_arg, *stat_args):
-        await ctx.send(charactersheet_db.get_cs_value(ctx.message.author.id, character_name_arg, stat_args))
 
-    #==========================================
+    @cs.group(case_insensitive=True, help="Various stat related commands")
+    async def stats(self, ctx):
+        if ctx.invoked_subcommand is None:
+            await ctx.send(f"Additional arguments required, "
+                           f"see **{ctx.prefix}help cs** for available options.")
+
+    @cs.command(case_insensitive=True, help="")
+    async def statnames(self,ctx):
+        await ctx.send(charactersheet_db.list_stat_names())
+
+    @stats.command(case_insensitive=True, help="Sets the supplied stats to the provided value.")
+    async def set(self, ctx, args):
+        def check(args):
+                return args.author == ctx.author and args.channel == ctx.channel
+        for arg in args:
+            await ctx.send("What would you like to set {} to?".format(arg))
+            response = await ctx.await_for('response', check=check)
+            print(response)
+            #await charactersheet_db.set_cs_value(ctx.message.author.id,"Bob",)
+
+    @stats.command(case_insensitive=True, help="Gets the supplied stats for the provided value")
+    async def get(self, ctx, args):
+        for arg in args:
+            csdata = [tupleA[0] for tupleA in charactersheet_db.get_cs_value(ctx.message.author.id, arg)]
+            response = "{}: {}".format(arg,csdata[0])
+            await ctx.send(response)
+    
+    @cs.command(case_insensitive=True, help="Activates a Character sheet for use.")
+    async def activate(self, ctx, namearg):
+        await ctx.send(charactersheet_db.activate_sheet(ctx.message.author.id, namearg))
     # Database/SQL Testing Below this point
     #==========================================       
     

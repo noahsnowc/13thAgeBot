@@ -14,11 +14,11 @@ def create_new_sheet(author_name, character_name, cursor):
         print("Database Updated")
         print(cursor.fetchall())
 
-def get_value(cursor, character_name, *args) :
-        print(character_name)
-        print(args)
-        for arg in args:
-                cursor.execute('SELECT ? from charactersheet where character_name=?',(arg, character_name))
+def get_value(cursor, author_name, arg) :
+        print(author_name)
+        print(arg)
+        query = 'SELECT '+arg+' from charactersheet WHERE active = true AND author_name=?'
+        cursor.execute(query,(author_name,))
         print(cursor.fetchall())
 
 def update_character(cursor, character_name, *args):
@@ -30,11 +30,12 @@ def update_character(cursor, character_name, *args):
         print("Updated Database")
         
 
-cursor.execute('Select race from charactersheet where character_name=?', ("Bob",))
+cursor.execute('Select class from charactersheet where character_name=?', ("Bob",))
 print(cursor.fetchall())
 #print(cursor.fetchall())
-#get_value(cursor, "Bob", 'class', 'race')
-#update_character(cursor, "Bob", 'class', 'race')
-#get_value(cursor, "Bob", 'class', 'race')
+#get_value(cursor, "Bob", 'class', 'race')]
+get_value(cursor, "Bob", 'class')
+cursor.execute('Select * from charactersheet')
+print(cursor.fetchall())
 
-THis all seems so fucked, willl look again in morning
+#THis all seems so fucked, willl look again in morning
