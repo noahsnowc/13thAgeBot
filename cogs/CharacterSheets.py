@@ -158,6 +158,7 @@ class Charactersheet_Commands(commands.Cog, name="Character Sheet Commands"):
             print(response)
             #await charactersheet_db.set_cs_value(ctx.message.author.id,"Bob",)
 
+    #stat command update
     @stats.command(case_insensitive=True, help="Gets the supplied stats for the provided value")
     async def get(self, ctx, args):
         for arg in args:
